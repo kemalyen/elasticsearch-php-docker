@@ -1,0 +1,45 @@
+nginx:
+    image: tutum/nginx
+    ports:
+        - "80:80"
+    links:
+        - phpfpm
+    volumes:
+        - ./nginx/default.conf:/etc/nginx/sites-available/default.conf
+        - ./nginx/default.conf:/etc/nginx/sites-enabled/default.conf
+
+        - ./logs/nginx-error.log:/var/log/nginx/error.log
+        - ./logs/nginx-access.log:/var/log/nginx/access.log
+phpfpm:
+    image: php:fpm
+    ports:
+        - "9000:9000"
+    volumes:
+        - ./www:/usr/share/nginx/html
+mysql:
+  image: mariadb
+  environment:
+    MYSQL_ROOT_PASSWORD: admin
+phpmyadmin:
+  image: phpmyadmin/phpmyadmin
+  restart: always
+  links:
+    - mysql
+  ports:
+    - 8183:80
+  environment:
+    MYSQL_USERNAME: admin
+    MYSQL_ROOT_PASSWORD: admin
+    PMA_ARBITRARY: 1
+
+elasticsearch:
+  image: elasticsearch:latest
+  command: elasticsearch -Des.network.host=0.0.0.0
+  ports:
+    - "9200:9200"
+    - "9300:9300"
+
+composer:
+  image: composer/composer
+  volumes:
+    - ./www:/usr/share/nginx/html
